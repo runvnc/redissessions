@@ -49,8 +49,8 @@ resp "The data is " & session["varname"]
 ## Iterating over session variables
 ```Nimrod
 forall session:
-  resp key & ": " & val  # key and val injected by 'forall' template
-``
+  echo key & ": " & val  # key and val injected by 'forall' template
+```
 
 ## Clearing session data
 ```Nimrod
