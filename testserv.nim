@@ -1,4 +1,4 @@
-import jester, redissessions, httpserver
+import jester, redissessions
 
 redissessions.config("expiresMinutes", "1")
 

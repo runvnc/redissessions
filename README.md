@@ -5,7 +5,7 @@ This module provides Redis-backed session support for Jester applications.
 The following is a simple application that demonstrates usage:
 
 ```Nimrod
-import jester, redissessions, httpserver
+import jester, redissessions
 
 redissessions.config("expiresMinutes", "1")
 
