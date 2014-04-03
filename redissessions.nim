@@ -40,17 +40,18 @@ proc makeSessionId():string =
   sid.delete(sid.len-1, sid.len-1)
   return sid  
 
-proc initSession(request: TRequest, response:PResponse):string =
-  session.enabled = true  
-  var sessionId = makeSessionId()
+proc setExpire(request: TRequest, sessionId:string):TTimeInfo = 
   var minutes = parseInt(session.configData["expiresMinutes"])
   var plus = (TTime(int(getTime()) + minutes * 60)).getGMTime()
   var seconds = minutes * 60
-  setCookie("sessionId", sessionId, plus)
   discard session.redisCon.expire("session:" & sessionId, seconds)  
- 
-  return sessionId
+  return plus
 
+proc initSession(request: TRequest, response:PResponse):string =
+  session.enabled = true
+  var sessionId = makeSessionId()
+  setCookie("sessionId", sessionId, request.setExpire(sessionId))
+  return sessionId
 
 proc getSessionId(request: TRequest, response:PResponse):string =
   if not session.enabled:
@@ -88,10 +89,12 @@ template forall*(s: TSession, actions: stmt):stmt {.immediate.} =
   
 template `[]=`*(t: TSession, key, val: string) =
   ## store session data.
+  bind setExpire
   var sessionId: string
   
   sessionId = getSessionId(request, response)
   discard session.redisCon.hSet("session:" & sessionId, key, val)
+  discard setExpire(request, sessionId) 
   
 template `[]`*(t: TSession, key: string):expr =
   ## get session data.
