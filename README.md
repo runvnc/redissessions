@@ -5,30 +5,34 @@ This module provides Redis-backed session support for Jester applications.
 The following is a simple application that demonstrates usage:
 
 ```Nimrod
-import jester, redissessions
+import jester, asyncdispatch, htmlgen
+import redissessions
 
 redissessions.config("expiresMinutes", "1")
 
-get "/saveit":
-  session["data1"]="Saved"
-  resp "ok"
+routes:
+  get "/saveit":
+    session["data1"]="Saved"
+    resp "ok"
 
-get "/data":
-  var outp = ""
-  forall session:
-    outp = outp & key & ": " & val
-  resp outp
+  get "/data":
+    var outp = ""
+    forall redissessions.session:
+      outp = outp & key & ": " & val
+    resp outp
 
-get "/loadit":
-  resp session["data1"]
+  get "/loadit":
+    resp session["data1"]
 
-get "/notset":
-  resp session["notset"]
+  get "/notset":
+    resp session["notset"]
 
-get "/clearit":
-  deleteSession
+  get "/clearit":
+    deleteSession
+    resp "Session deleted"
 
-run()
+runForever()
+
 ```
 
 ## Configuring
@@ -48,7 +52,7 @@ resp "The data is " & session["varname"]
 
 ## Iterating over session variables
 ```Nimrod
-forall session:
+forall redissessions.session:
   echo key & ": " & val  # key and val injected by 'forall' template
 ```
 
